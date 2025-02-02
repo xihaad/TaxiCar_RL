@@ -1,58 +1,91 @@
 import numpy as np
+import time
+import random
 
 
 class TaxiEnv:
-    def __init__(self, size=5):
-        self.size = size
-        self.walls = [(1, 1), (1, 3), (3, 1), (3, 3)]
-        self.passenger_pos = (0, 0)
-        self.destination = (4, 4)
-        self.taxi_pos = (2, 2)
-        self.has_passenger = False
-        self.actions = ["up", "down", "left", "right", "pickup", "dropoff"]
+    def __init__(self):
+        self.size = 10
+        self.walls = [
+            (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7),
+            (5, 3), (5, 4), (5, 5), (5, 6), (5, 7),
+            (7, 1), (7, 2), (7, 3), (7, 4), (7, 5), (7, 6),
+            (3, 8), (4, 8), (5, 8), (6, 8), (1, 5), (8, 5)
+        ]
+        self.locations = {
+            'A': (0, 0), 'B': (0, 9),
+            'C': (9, 0), 'D': (9, 9)
+        }
+        self.actions = [0, 1, 2, 3, 4, 5]  # Down, Up, Right, Left, Pickup, Dropoff
+        self.reset()
 
-    def reset(self):
-        self.taxi_pos = (2, 2)
+    def reset(self, pickup=None, destination=None):
+        # Set pickup and destination
+        if pickup and destination:
+            self.pickup = self.locations[pickup]
+            self.destination = self.locations[destination]
+        else:
+            locs = list(self.locations.keys())
+            self.pickup, self.destination = random.sample(locs, 2)
+            self.pickup = self.locations[self.pickup]
+            self.destination = self.locations[self.destination]
+
+        # Initialize taxi position (not at pickup/destination)
+        while True:
+            self.taxi_pos = (random.randint(0, self.size - 1),
+                             random.randint(0, self.size - 1))
+            if (self.taxi_pos != self.pickup and
+                    self.taxi_pos != self.destination):
+                break
+
         self.has_passenger = False
         return self._get_state()
 
     def _get_state(self):
-        return (*self.taxi_pos, self.has_passenger, *self.destination)
+        return (*self.taxi_pos,
+                *self.pickup,
+                *self.destination,
+                self.has_passenger)
 
-    def _is_valid_move(self, pos):
+    def _is_valid(self, pos):
         x, y = pos
-        return 0 <= x < self.size and 0 <= y < self.size and pos not in self.walls
+        return (0 <= x < self.size and
+                0 <= y < self.size and
+                pos not in self.walls)
 
     def step(self, action):
-        reward = -1  # Default step penalty
+        reward = -1  # Time penalty
         done = False
         x, y = self.taxi_pos
 
-        if action == "up":
-            new_pos = (x - 1, y)
-        elif action == "down":
-            new_pos = (x + 1, y)
-        elif action == "left":
-            new_pos = (x, y - 1)
-        elif action == "right":
-            new_pos = (x, y + 1)
+        # Movement actions
+        if action == 0:
+            new_pos = (x + 1, y)  # Down
+        elif action == 1:
+            new_pos = (x - 1, y)  # Up
+        elif action == 2:
+            new_pos = (x, y + 1)  # Right
+        elif action == 3:
+            new_pos = (x, y - 1)  # Left
         else:
             new_pos = (x, y)
 
-        if action in ["up", "down", "left", "right"]:
-            if self._is_valid_move(new_pos):
+        if action <= 3:
+            if self._is_valid(new_pos):
                 self.taxi_pos = new_pos
             else:
-                reward = -3  # Wall collision penalty
+                reward -= 2  # Extra penalty for hitting wall
 
-        elif action == "pickup":
-            if self.taxi_pos == self.passenger_pos and not self.has_passenger:
+        # Pickup action
+        elif action == 4:
+            if self.taxi_pos == self.pickup and not self.has_passenger:
                 self.has_passenger = True
                 reward = 10
             else:
                 reward = -10
 
-        elif action == "dropoff":
+        # Dropoff action
+        elif action == 5:
             if self.taxi_pos == self.destination and self.has_passenger:
                 done = True
                 reward = 20
@@ -62,17 +95,24 @@ class TaxiEnv:
         return self._get_state(), reward, done
 
     def render(self):
-        grid = np.full((self.size, self.size), '.')
+        grid = np.full((self.size, self.size), '.', dtype='object')
+
+        # Add walls
         for wall in self.walls:
             grid[wall] = '#'
-        grid[self.passenger_pos] = 'P'
-        grid[self.destination] = 'D'
-        x, y = self.taxi_pos
-        grid[x, y] = 'T' if not self.has_passenger else 'Ṫ'
 
+        # Add locations
+        grid[self.pickup] = 'P'
+        grid[self.destination] = 'D'
+
+        # Add taxi
+        tx, ty = self.taxi_pos
+        grid[tx, ty] = 'T' if not self.has_passenger else 'Ṫ'
+
+        # Print grid
         print("+" + "---+" * self.size)
         for row in grid:
             print("| " + " | ".join(row) + " |")
             print("+" + "---+" * self.size)
-        print(f"Passenger: {'With taxi' if self.has_passenger else 'At P'}")
-        print(f"Destination: D")
+        print(f"Passenger: {'In taxi' if self.has_passenger else 'At pickup'}")
+        print(f"Destination: {self.destination}\n")
