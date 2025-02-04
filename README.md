@@ -2,7 +2,7 @@
 # AI TaxiCar Navigator with Q-Learning 
 
 
-A reinforcement learning project implementing Q-Learning and Deep Q-Networks (DQN) to train a taxi agent in a 10x10 grid environment with obstacles and dynamic passenger/destination locations.
+A reinforcement learning project implementing Q-Learning to train a taxi agent in a 10x10 grid environment with obstacles and dynamic passenger/destination locations.
 
 ## Key Features
 - 🚕 **10x10 Grid World** with complex wall configurations
