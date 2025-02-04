@@ -1,5 +1,4 @@
 import numpy as np
-import time
 import random
 
 
@@ -13,22 +12,49 @@ class TaxiEnv:
             (3, 8), (4, 8), (5, 8), (6, 8), (1, 5), (8, 5)
         ]
         self.locations = {
-            'A': (0, 0), 'B': (0, 9),
-            'C': (9, 0), 'D': (9, 9)
+            'A': (0, 0),
+            'B': (0, 9),
+            'C': (9, 0),
+            'D': (9, 9)
         }
         self.actions = [0, 1, 2, 3, 4, 5]  # Down, Up, Right, Left, Pickup, Dropoff
         self.reset()
 
+    @property
+    def pickup(self):
+        return self._pickup
+
+    @pickup.setter
+    def pickup(self, value):
+        if isinstance(value, str):
+            self._pickup = self.locations[value]
+        else:
+            self._pickup = value
+
+    @property
+    def destination(self):
+        return self._destination
+
+    @destination.setter
+    def destination(self, value):
+        if isinstance(value, str):
+            self._destination = self.locations[value]
+        else:
+            self._destination = value
+
     def reset(self, pickup=None, destination=None):
         # Set pickup and destination
         if pickup and destination:
-            self.pickup = self.locations[pickup]
-            self.destination = self.locations[destination]
+            self.pickup = pickup
+            self.destination = destination
         else:
             locs = list(self.locations.keys())
-            self.pickup, self.destination = random.sample(locs, 2)
-            self.pickup = self.locations[self.pickup]
-            self.destination = self.locations[self.destination]
+            while True:
+                p, d = random.sample(locs, 2)
+                if p != d:
+                    self.pickup = p
+                    self.destination = d
+                    break
 
         # Initialize taxi position (not at pickup/destination)
         while True:
