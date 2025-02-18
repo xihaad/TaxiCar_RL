@@ -17,7 +17,7 @@ A reinforcement learning project implementing Q-Learning to train a taxi agent i
   - -10 for invalid pickup/dropoff
   - -2 for wall collisions
   
-## Future Goals
+## Future Goals and Improvements
   - Deep Q-Network (DQN) with bigger state and multiple Passenger/Destination locations
 
 ## Installation
@@ -39,3 +39,9 @@ python train_dqn.py
  - There are two branches right now and you can switch between them:
    - `main` for the the grid version, no GUI
    - `multi_location` for the grid version with GUI
+
+  
+5. Credits:
+ - The project is inspired by this link:
+https://shorturl.at/bagnp
+ - But it is designed from scratch and improvised the idea by myself.
