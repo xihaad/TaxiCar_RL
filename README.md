@@ -32,5 +32,5 @@ pip install -r requirements.txt
 ```
 3. Run the agent:
 ```bash
-python train_dqn.py
+python main.py
 ```
