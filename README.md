@@ -17,7 +17,7 @@ A reinforcement learning project implementing Q-Learning to train a taxi agent i
   - -10 for invalid pickup/dropoff
   - -2 for wall collisions
   
-## Future Goals
+## Future Goals and Improvements
   - Deep Q-Network (DQN) with bigger state and multiple Passenger/Destination locations
 
 ## Installation
